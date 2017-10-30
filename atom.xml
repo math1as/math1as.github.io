@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>math1as&#39; blog</title>
+  
+  <subtitle>Logic Vuln Researcher</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://yoursite.com/"/>
+  <updated>2017-10-30T09:45:53.968Z</updated>
+  <id>http://yoursite.com/</id>
+  
+  <author>
+    <name>math1as</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>test</title>
+    <link href="http://yoursite.com/2017/10/30/test/"/>
+    <id>http://yoursite.com/2017/10/30/test/</id>
+    <published>2017-10-30T09:45:53.000Z</published>
+    <updated>2017-10-30T09:45:53.968Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+  </entry>
+  
+</feed>
