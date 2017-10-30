@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2017-10-30T12:04:08.144Z</updated>
+  <updated>2017-10-30T12:12:56.776Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -17,20 +17,21 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title></title>
-    <link href="http://yoursite.com/2017/10/30/migrate/"/>
-    <id>http://yoursite.com/2017/10/30/migrate/</id>
-    <published>2017-10-30T12:04:08.144Z</published>
-    <updated>2017-10-30T12:04:08.144Z</updated>
+    <title>migration</title>
+    <link href="http://yoursite.com/2017/10/30/migration/"/>
+    <id>http://yoursite.com/2017/10/30/migration/</id>
+    <published>2017-10-30T12:11:06.000Z</published>
+    <updated>2017-10-30T12:12:56.776Z</updated>
     
-    <content type="html"><![CDATA[<hr><h2 id="migration"><a href="#migration" class="headerlink" title="migration"></a>migration</h2><p>I migrate my blog to here due to the potential typecho vuln</p>]]></content>
+    <content type="html"><![CDATA[<p>I migrate my blog to here due to the potential typecho vuln</p><p>I’ll pick some of my old posts ,and put them here.</p>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;hr&gt;
-&lt;h2 id=&quot;migration&quot;&gt;&lt;a href=&quot;#migration&quot; class=&quot;headerlink&quot; title=&quot;migration&quot;&gt;&lt;/a&gt;migration&lt;/h2&gt;&lt;p&gt;I migrate my blog to here due to the 
+        &lt;p&gt;I migrate my blog to here due to the potential typecho vuln&lt;/p&gt;
+&lt;p&gt;I’ll pick some of my old posts ,and put them here.&lt;/p&gt;
+
       
     
     </summary>
