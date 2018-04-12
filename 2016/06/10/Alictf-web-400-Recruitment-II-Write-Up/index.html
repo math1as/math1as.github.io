@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+    <head>
+		
+        <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="description" content="Browser Security">
+        <link rel="shortcut icon" href="https://miao.su/images/2017/11/01/19367566_1417333275024768_5995578623556321280_ndd7d5.jpg"/>
+        <link rel="alternate" type="application/rss+xml" title="math1as" href="/atom.xml">
+        <title>Alictf web 400 Recruitment[II] Write Up | math1as&#39; blog</title>
+        <meta name="description" content="{{meta_description}}">
+
+        <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/styles/crisp.css">
+        <meta name="HandheldFriendly" content="True" />
+        <meta name="MobileOptimized" content="320" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+    </head>
+    
+		<body class="post-template">
+	
+
+        <header id="header">
+            <a id="logo" href="/"><img src="https://miao.su/images/2017/11/01/19367566_1417333275024768_5995578623556321280_ndd7d5.jpg" alt="math1as' blog" /></a>
+            <h1><a href="/">math1as</a></h1>
+            <p>Security Researcher</p>
+            <div id="follow-icons">
+              <a href="http://twitter.com/Ma7h1as"><i class="fa fa-twitter-square fa-2x"></i></a>
+          <a href="/atom.xml"><i class="fa fa-rss-square fa-2x"></i></a>
+  </div>
+<h6><a href="/About">About</a></h6>
+<h6><a href="/friendlink">Friendlink</a></h6
+<h6><a href="/papers">Papers</a></h6>
+<h6><a href="/Credit">Credit</a></h6>
+<h6><a href="/Bounty">Bounty</a></h6>
+        </header>
+
+        <main id="content">
+        
+
+<article class="post">
+  June 10, 2016
+  
+
+  <h1 class="post-title">Alictf web 400 Recruitment[II] Write Up</h1>
+  <section class="post-content article-entry">
+    <p>the upload module could get content from external URL</p>
+<p>so that it may use curl or file_get_contents function , if the URL is not checked , then it turns into a SSRF vuln</p>
+<p>for URL , it could only end with .jpg</p>
+<p>but we could use 302 redirection</p>
+<p>nodeJS</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">response.writeHead(302, &#123;</div><div class="line">  &apos;Location&apos;: &apos;gopher://127.0.0.1:80/&apos;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<p>fisrt i tried file:// php:// scheme but failed</p>
+<p>so that it may be use curl</p>
+<p>then i use gopher scheme to detect which port is open</p>
+<p>as i guessed,port 11211 is open, and the memcached server could be exploited by local user</p>
+<p>now we could try to build an attack chain</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">gopher://127.0.0.1:11211/_stats%20items%0d%0a</div><div class="line">stats item xxx</div><div class="line">stats cachedump 5 100</div></pre></td></tr></table></figure>
+<p>it shows the value of session,and we know that php use memcached to save session</p>
+<p><img src="https://miao.su/images/2018/04/12/x074caf.jpg" alt="pic1"></p>
+<p>use</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">set key flags exptime bytes</div></pre></td></tr></table></figure>
+<p>then we get into administrator’s account</p>
+<p><img src="https://miao.su/images/2018/04/12/x1a83a8.png" alt="pic2"></p>
+<p>but we could not get the flag since it shows a notification</p>
+<p><img src="https://miao.su/images/2018/04/12/x2c1e20.png" alt="pic3"></p>
+<p>see the html sourcecode and find the backup code</p>
+<p><img src="https://miao.su/images/2018/04/12/x3b382b.jpg" alt="pic4"></p>
+<p>absolutely there is a SQL injection vuln</p>
+<p><img src="https://miao.su/images/2018/04/12/x451c3a.png" alt="pic5"></p>
+<p>and finally capture the flag</p>
+
+  </section>
+  <footer class="post-footer">
+    <!--
+    <section class="author">
+      <h4>math1as</h4>
+      <p></p>
+    </section>
+    -->
+  </footer>
+</article>
+
+<nav class="pagination" role="pagination">
+    
+    <a class="newer-posts" href="/2017/04/09/L-CTF-2016-pwn200/">
+        ← prev <!--L-CTF-2016-pwn200-->
+    </a>
+    
+    <span class="page-number">•</span>
+    
+    <a class="older-posts" href="/2016/05/15/a-way-to-bypass-php-tags-check/">
+        <!--a way to bypass php tags check--> next →
+    </a>
+    
+</nav>
+
+
+        </main>
+        <footer id="footer">
+            <section id="footer-message">&copy; 2017 math1as.</section>
+       </footer>
+    </body>
+</html>
+
+

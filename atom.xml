@@ -202,6 +202,28 @@
   </entry>
   
   <entry>
+    <title>Alictf web 400 Recruitment[II] Write Up</title>
+    <link href="http://www.math1as.com/2016/06/10/Alictf-web-400-Recruitment-II-Write-Up/"/>
+    <id>http://www.math1as.com/2016/06/10/Alictf-web-400-Recruitment-II-Write-Up/</id>
+    <published>2016-06-10T14:20:21.000Z</published>
+    <updated>2018-04-12T07:33:36.006Z</updated>
+    
+    <content type="html"><![CDATA[<p>the upload module could get content from external URL</p><p>so that it may use curl or file_get_contents function , if the URL is not checked , then it turns into a SSRF vuln</p><p>for URL , it could only end with .jpg</p><p>but we could use 302 redirection</p><p>nodeJS</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">response.writeHead(302, &#123;</div><div class="line">  &apos;Location&apos;: &apos;gopher://127.0.0.1:80/&apos;</div><div class="line">&#125;);</div></pre></td></tr></table></figure><p>fisrt i tried file:// php:// scheme but failed</p><p>so that it may be use curl</p><p>then i use gopher scheme to detect which port is open</p><p>as i guessed,port 11211 is open, and the memcached server could be exploited by local user</p><p>now we could try to build an attack chain</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">gopher://127.0.0.1:11211/_stats%20items%0d%0a</div><div class="line">stats item xxx</div><div class="line">stats cachedump 5 100</div></pre></td></tr></table></figure><p>it shows the value of session,and we know that php use memcached to save session</p><p><img src="https://miao.su/images/2018/04/12/x074caf.jpg" alt="pic1"></p><p>use</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">set key flags exptime bytes</div></pre></td></tr></table></figure><p>then we get into administrator’s account</p><p><img src="https://miao.su/images/2018/04/12/x1a83a8.png" alt="pic2"></p><p>but we could not get the flag since it shows a notification</p><p><img src="https://miao.su/images/2018/04/12/x2c1e20.png" alt="pic3"></p><p>see the html sourcecode and find the backup code</p><p><img src="https://miao.su/images/2018/04/12/x3b382b.jpg" alt="pic4"></p><p>absolutely there is a SQL injection vuln</p><p><img src="https://miao.su/images/2018/04/12/x451c3a.png" alt="pic5"></p><p>and finally capture the flag</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;the upload module could get content from external URL&lt;/p&gt;
+&lt;p&gt;so that it may use curl or file_get_contents function , if the URL is not ch
+      
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
     <title>a way to bypass php tags check</title>
     <link href="http://www.math1as.com/2016/05/15/a-way-to-bypass-php-tags-check/"/>
     <id>http://www.math1as.com/2016/05/15/a-way-to-bypass-php-tags-check/</id>
