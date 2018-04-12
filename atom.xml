@@ -133,29 +133,6 @@
   </entry>
   
   <entry>
-    <title>migration</title>
-    <link href="http://www.math1as.com/2017/10/30/migration/"/>
-    <id>http://www.math1as.com/2017/10/30/migration/</id>
-    <published>2017-10-30T12:11:06.000Z</published>
-    <updated>2017-10-30T12:12:56.776Z</updated>
-    
-    <content type="html"><![CDATA[<p>I migrate my blog to here due to the potential typecho vuln</p><p>I’ll pick some of my old posts ,and put them here.</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;I migrate my blog to here due to the potential typecho vuln&lt;/p&gt;
-&lt;p&gt;I’ll pick some of my old posts ,and put them here.&lt;/p&gt;
-
-      
-    
-    </summary>
-    
-    
-  </entry>
-  
-  <entry>
     <title>inherited strategy in Chrome CSP Bypass</title>
     <link href="http://www.math1as.com/2017/09/08/Chrome-unsafe-inline-CSP-Bypass/"/>
     <id>http://www.math1as.com/2017/09/08/Chrome-unsafe-inline-CSP-Bypass/</id>
