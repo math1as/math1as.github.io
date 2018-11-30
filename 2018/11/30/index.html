@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+    <head>
+    
+        <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="description" content="Browser Security Research">
+        <link rel="shortcut icon" href="https://miao.su/images/2017/11/01/19367566_1417333275024768_5995578623556321280_ndd7d5.jpg"/>
+        <link rel="alternate" type="application/rss+xml" title="math1as" href="/atom.xml">
+        <title>How to find LPE in windows ALPC (CVE-2018-8440 analysis) | math1as&#39; blog</title>
+        <meta name="description" content="{{meta_description}}">
+
+        <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/styles/crisp.css">
+        <meta name="HandheldFriendly" content="True" />
+        <meta name="MobileOptimized" content="320" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+    </head>
+    
+    <body class="post-template">
+  
+
+        <header id="header">
+            <a id="logo" href="/"><img src="https://miao.su/images/2017/11/01/19367566_1417333275024768_5995578623556321280_ndd7d5.jpg" alt="math1as' blog" /></a>
+            <h1><a href="/">math1as</a></h1>
+            <p>Security Researcher</p>
+            <div id="follow-icons">
+              <a href="http://twitter.com/Ma7h1as"><i class="fa fa-twitter-square fa-2x"></i></a>
+          <a href="/atom.xml"><i class="fa fa-rss-square fa-2x"></i></a>
+  </div>
+<h6><a href="/About">About</a></h6>
+<h6><a href="/friendlink">Friendlink</a></h6
+<h6><a href="/papers">Papers</a></h6>
+<h6><a href="/Acknowledgement">Acknowledgement</a></h6>
+<h6><a href="/Bug%20Hunting">Bug List</a></h6>
+        </header>
+
+        <main id="content">
+        
+
+<article class="post">
+  April 12, 2018
+  
+
+  <h1 class="post-title">How to find LPE in windows ALPC (CVE-2018-8440 analysis)</h1>
+  <section class="post-content article-entry">
+    <p>CVE-2018-8440 is a LPE released by @sandboxescaper</p>
+<p>debug enviorment: Windows10 + rpc viewer + IDA pro</p>
+
+<h2 id="what_is_alpc"><a href="#what_is_alpc" class="headerlink" title="what_is_alpc"></a>what is ALPC</h2><p>ALPC(Advanced Local Procedure Call) is an internal, undocumented inter-process communication facility provided by the Microsoft Windows NT kernel for lightweight IPC between processes on the same computer.</p> 
+
+<p>ALPC is called in the following situation:</p>
+<p>1.when using the Microsoft RPC API to communicate locally, i.e. between the processes on the same machine</p>
+<p>2.by calling Windows APIs that are implemented with ALPC</p>
+<p>Actually I'm do not know any about the detail of #2 , so let's just talk about RPC API to communicate locally</p>
+<h2 id="analysis"><a href="#analysis" class="headerlink" title="analysis"></a>vulnerability analysis</h2>
+<p>CVE-2018-8440 is a LPE vulnerability in windows task ALPC , attacker could create a hardlink to the file he want to gain access , then a function in schedsvc.dll could be abused to set DACL(Discretionary Access Control List) of this hardlink.</p>
+<p>DACL setting on the hardlink leads to a same operation on the target file , attacker could rewrite an auto-run exe or dll , then gain administrator priviledge.</p>
+<p>Let's see how we could discover it in an easier way</p>
+<p>open rpc reviewer , see interfaces in system</p>
+<p><img src="https://miao.su/images/2018/11/30/121d39.png" alt="pic1"></p>
+<p>then the function name is shown on the right.</p>
+<p>we use IDA pro to anlysis schedsvc.dll , find what SchRpcSetSecurity function do.</p>
+<p><img src="https://miao.su/images/2018/11/30/399a46.png" alt="pic2"></p>
+<p>the function receive 3 parameters , then call RpcServer::SetSecurity</p>
+<p><img src="https://miao.su/images/2018/11/30/403f63.png" alt="pic3"></p>
+<p>we could see that parameter 1 is used as a filename points to C:\windows\tasks\ , the extension name is .job , then parameter 2 is a SDDL string , which used to describe DACL. it was transfromed to SecurityDescriptor by function ConvertStringSecurityDescriptorToSecurityDescriptor.</p>
+<p>ok , the problem is clear , we could create a hardlink with .job extension , then use SchRpcSetSecurity function to set DACL.</p>
+<p>the exploit template could be found in jamesforshow's historical report , what you need to do is transform the interface to .idl file , rpc viewer could help you do this.</p>
+<p><img src="https://miao.su/images/2018/11/30/5e2504.jpg" alt="pic4"></p>
+<p>so finally we call SchRpcSetSecurity("hardlink","sddl_string",0) , everything is done.</p>
+<h2 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h2><p><a href="https://sandboxescaper.blogspot.com/2018/10/reversing-alpc-where-are-your-windows.html" target="_blank" rel="external">https://sandboxescaper.blogspot.com/2018/10/reversing-alpc-where-are-your-windows.html</a></p>
+
+  </section>
+  <footer class="post-footer">
+    <!--
+    <section class="author">
+      <h4>math1as</h4>
+      <p></p>
+    </section>
+    -->
+  </footer>
+</article>
+
+<nav class="pagination" role="pagination">
+    
+    <span class="page-number">•</span>
+    
+    <a class="older-posts" href="/2018/04/12/CVE-2016-7189-analysis/">
+        <!--CVE-2017-0236 analysis--> next →
+    </a>
+    
+</nav>
+
+
+        </main>
+        <footer id="footer">
+            <section id="footer-message">&copy; 2017 math1as.</section>
+       </footer>
+    </body>
+</html>
